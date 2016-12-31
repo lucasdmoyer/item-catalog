@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <!--LOAD PRE-REQUISITES FOR GOOGLE SIGN IN 
+  Creates an anonymous function that inserts a script into the DOM of the login.html page -->
+   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
+  </script>
+
+<script src="//apis.google.com/js/platform.js?onload=start"> </script>
+
+<!-- END PRE-REQUISITES FOR GOOGLE SIGN IN -->
+
+
+</head>
+
+
+<body>  
+
+
+<!-- GOOGLE PLUS SIGN IN BUTTON-->
+
+          <!-- 
+          scope shows what google resoureces we want to access
+          clientid is the Client ID we generated on console.developers.google.com
+          redirecturi sets a post message that enable sthe one-time use code flow
+          accesstype = offline allows user to make requests to the Google API server even if the user is not logged in
+          cookiepoliy determines the scope of URls that can access the cookie, so we use single_host_orign because our website is a single domain with no subdomiains
+          data call back - if user clicks and grants us access to their profile this callback method is called and given the one time use code with access token
+          data-approvalpromt force means that our user has to login each time we visit the login page and doesn't check to see if they are already logged in, useful for debugging but will disable later
+          -->
+          <div id="signInButton">
+          <span class="g-signin"
+            data-scope="openid email"
+            data-clientid="442715214442-n830vptvjnikdtkjnk5s1bjklohqbq83.apps.googleusercontent.com"
+            data-redirecturi="postmessage"
+            data-accesstype="offline"
+            data-cookiepolicy="single_host_origin"
+            data-callback="signInCallback"
+            data-approvalprompt="force">
+          </span>
+        </div>
+
+
+<div id="result"></div>
+<!--Hefore you can test to see if the works, need to create server-side G-connect that accepts the one0time code for my client's callback function -->
+<script>
+function signInCallback(authResult) {
+  //If object contains a parameter 'code' then we the authorization with the Google API server was successful and our one time use code is present
+  if (authResult['code']) {
+    // Hide the sign-in button now that the user is authorized
+    $('#signinButton').attr('style', 'display: none');
+    // Send the one-time-use code to the server, if the server responds, write a 'login successful' message to the web page and then redirect back to the main restaurants page
+    //Using jQuery to create an Ajaz call that passes the one time code Google gave the client onto the server
+    $.ajax({
+      type: 'POST',
+      //method url is defined on my server, passes in the server state toekn as an argument to verify against the cross-site reference forery attack
+      url: '/gconnect?state={{STATE}}',
+      //setting to false means we don't want jQuery to processs the result as a string, formated with a universeral character set called Unicode
+      processData: false,
+      //specify the data we are going to send along to our server
+      data: authResult['code'],
+      //we are sending an arbitrary binary stream of data as the one time use code
+      contentType: 'application/octet-stream; charset=utf-8',
+      //when we receive a 200 or a successfull response code from our server, we return a sucessfull login message to the user and redirect to the restaurant's main page after about four seconds
+      success: function(result) {
+        // Handle or verify the server response if necessary.
+        if (result) {
+          //the result variable is any additionary info the server has to pass to the client. We display this in the div above the script
+          $('#result').html('Login Successful!</br>'+ result + '</br>Redirecting...')
+         setTimeout(function() {
+          window.location.href = "/catalog";
+         }, 4000);
+          //error is sent to the result div
+      } else if (authResult['error']) {
+    console.log('There was an error: ' + authResult['error']);
+  } else {
+        $('#result').html('Failed to make a server-side call. Check your configuration and console.');
+         }
+      }
+      
+  }); } }
+</script>
+
+
+
+<!--END GOOGLE PLUS SIGN IN -->
+
+
+</body>
+
+</html>

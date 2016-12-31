@@ -1,0 +1,41 @@
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+
+<div class = 'flash'>
+	{% with messages = get_flashed_messages() %}
+    	{% if messages %}
+        	<ul>
+        		{% for message in messages %}
+            		<li> <strong> {{ message }} </strong> </li>
+        		{% endfor %}
+        	</ul>
+        {% endif %}
+    {% endwith %}
+
+</div>
+
+<div>
+	<h2>Edit Item</h2>
+</div>
+
+<div>
+    <form action="#" method ="post">
+        <label for ="name">Name:</label>
+            <input type ="text" maxlength="100" name="name" value="{{item.name}}">
+
+        <label for="description">Description:</label>
+        <input type = "text" maxlength="250" name="description" value="{{item.description}}">
+
+        <label for="price">Price:</label>
+        $<input type ="text" maxlength="10" name="price" value="{{item.price}}">
+
+        <button type="submit" id="submit">
+            Edit Item!
+        </button>
+
+
+</div>
+					
+
+{% endblock %}
