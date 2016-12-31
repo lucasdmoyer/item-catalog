@@ -158,18 +158,18 @@ def gconnect():
 # Disconnect based on provider
 @app.route('/disconnect')
 def disconnect():
-    if 'provider' in login_session:
-        if login_session['provider'] == 'google':
-            gdisconnect()
-            del login_session['gplus_id']
-            #could have problems with this these two lines below
-            #if login_session['credentials']:
-              #del login_session['credentials']
-        flash("You have successfully been logged out.")
-        return redirect(url_for('showCategories'))
-    else:
-        flash("You were not logged in")
-        return redirect(url_for('showCategories'))
+	if 'provider' in login_session:
+		if login_session['provider'] == 'google':
+			gdisconnect()
+			del login_session['gplus_id']
+			#could have problems with this these two lines below
+			#if login_session['credentials']:
+			  #del login_session['credentials']
+		flash("You have successfully been logged out.")
+		return redirect(url_for('showCategories'))
+	else:
+		flash("You were not logged in")
+		return redirect(url_for('showCategories'))
 
 # User Helper Functions
 def createUser(login_session):
@@ -239,7 +239,11 @@ def showItem(category_name, item_name):
 	categories = session.query(Category).order_by(asc(Category.name))
 	category = session.query(Category).filter_by(name = category_name).one()
 	item = session.query(Item).filter_by(name = item_name).first()
-	return render_template('item.html', category = category, item = item, categoires = categories)
+	if 'username' not in login_session:
+		return render_template('publicitem.html', category=category,item=item, categories=categories)
+	else:
+		return render_template('item.html', category = category, item = item, categoires = categories)
+
 
 #Create a new item
 @app.route('/catalog/new',methods=['GET','POST'])
